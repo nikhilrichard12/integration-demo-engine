@@ -1,0 +1,810 @@
+<style>
+/* ===========================================================================
+   "See it work" -- a frame-for-frame recreation of Kestrel's OWN demo UI,
+   measured from the shipped demo videos (todoist/gmail/notion in this
+   template's VIDEOS map). Measurements: docs/GEOMETRY.md
+
+   Reference frames are 1440x1080. Every dimension is in `cqw` (1cqw = 1% of
+   the stage width = 14.4px of the reference frame) on a fixed 4:3 stage, so
+   proportions hold at any rendered size and cannot reflow the page.
+
+   ONE EMBED, MANY SPOKES. This sits on the SHARED spoke template. The script
+   looks the page's slug up in DEMOS and returns if there is no entry, so
+   generic pages get nothing. Every class is int-ld-*.
+
+   CLAIMS: each demo's strings come from that tool's OWN claims doc section, and
+   every demo is READS ONLY -- no write is animated anywhere, even where the
+   section approves writes.
+   =========================================================================== */
+.int-ld,.int-ld *,.int-ld *::before,.int-ld *::after{box-sizing:border-box}
+.int-ld{
+  --ink:#141414; --body:rgba(27,28,21,.75); --step:#141414;
+  --bubble:#f5f3eb; --comp:#fafaf8; --comp-line:#efe9dc;
+  --card:#fdfbf9; --card-line:#f0efe9; --prog:#a9b0e8;
+  --panel-line:rgba(27,28,21,.13); --muted:#8a8b7e;
+  --amber:#e2a336; --indigo:#5E6AD2; --green:#2f8f5b; --red:#c4553d;
+  font-family:"Sohne Buch",Sohne,Arial,sans-serif;
+  width:min(1040px,92vw); max-width:none;
+  position:relative; left:50%; transform:translateX(-50%);
+  /* Was 1rem top, when a heading and subline sat above the stage and did the
+     separating. With those gone the stage is the first thing in the block and
+     needs the breathing room itself, or it crowds whatever precedes it in the
+     hero. Bottom is unchanged. */
+  margin:2rem auto 2.5rem; text-align:left;
+}
+/* .int-ld-head / -title / -sub removed 2026-08-28 -- nothing renders them. */
+
+.int-ld-stage{
+  container-type:inline-size;
+  position:relative; aspect-ratio:4/3; width:100%;
+  background:#fff; border:1px solid var(--panel-line); border-radius:.75rem;
+  overflow:hidden; color:var(--ink);
+}
+.int-ld-act{position:absolute; inset:0; opacity:0; pointer-events:none}
+.int-ld-act.on{opacity:1}
+
+/* ---------- ACT 1: the composer ---------- */
+.int-ld-comp{
+  position:absolute; left:9.375cqw; top:26.042cqw; width:81.389cqw; height:17.708cqw;
+  background:var(--comp); border:1px solid var(--comp-line); border-radius:1.597cqw;
+}
+.int-ld-ctext{
+  position:absolute; left:2.569cqw; top:3.3cqw; right:2.569cqw;
+  font-size:2.361cqw; line-height:1.35; color:var(--ink); white-space:pre-wrap;
+}
+.int-ld-cbar{position:absolute; left:1.736cqw; right:1.528cqw; bottom:1.6cqw; height:4.583cqw; display:flex; align-items:center}
+.int-ld-plus{
+  width:3.611cqw; height:3.611cqw; border:1px solid var(--comp-line); border-radius:.833cqw;
+  display:flex; align-items:center; justify-content:center; color:#6f6f6a; font-size:2.1cqw; line-height:1;
+}
+.int-ld-mic{margin-left:auto; width:2.083cqw; height:2.083cqw; color:#8a8a85}
+.int-ld-send{
+  margin-left:2.4cqw; width:4.583cqw; height:4.583cqw; border-radius:50%;
+  background:#141414; display:flex; align-items:center; justify-content:center;
+}
+.int-ld-send svg{width:2cqw; height:2cqw; color:#fff}
+
+/* ---------- ACT 2: bubble, tool card, steps ---------- */
+.int-ld-bub{
+  position:absolute; right:13.889cqw; top:20.5cqw; max-width:45.833cqw;
+  background:var(--bubble); border-radius:1.667cqw; padding:1.667cqw 1.944cqw;
+  font-size:2.361cqw; line-height:1.32; color:#1b1c15;
+  opacity:0; transition:opacity .3s ease;
+}
+.int-ld-bub.on{opacity:1}
+/* The "working" indicator is an indigo highlight that ORBITS the card's 1px
+   ring. NOT a progress bar and NOT a left-to-right fill: in todoist frame 05
+   it sits on the right edge and one second later in frame 06 on the left. A
+   rotating conic gradient clipped by the wrapper's rounded overflow; the
+   opaque card face masks the middle so only the 1px edge shows. The square
+   must be at least the card's diagonal or the corners go dark mid-rotation. */
+.int-ld-cardw{
+  position:absolute; left:14.097cqw; top:32.5cqw; height:8.125cqw;
+  padding:1.5px; border-radius:1.111cqw;
+  background-color:var(--card-line);
+  overflow:hidden; isolation:isolate;
+  opacity:0; transition:opacity .25s ease;
+}
+.int-ld-cardw.on{opacity:1}
+.int-ld-cardw::before{
+  content:''; position:absolute; top:50%; left:50%;
+  width:36cqw; height:36cqw; margin:-18cqw 0 0 -18cqw;
+  background:conic-gradient(from 0turn,
+    transparent 0 54%, var(--prog) 68%, var(--prog) 84%, transparent 96% 100%);
+  opacity:0; transition:opacity .3s ease;
+}
+.int-ld-cardw.run::before{opacity:1; animation:int-ld-orbit 2s linear infinite}
+@keyframes int-ld-orbit{to{transform:rotate(1turn)}}
+.int-ld-card{
+  position:relative; z-index:1;
+  height:100%; display:inline-flex; align-items:center; gap:1.667cqw;
+  padding:0 1.944cqw 0 1.389cqw;
+  background:var(--card); border-radius:calc(1.111cqw - 1.5px);
+}
+/* LOGO SIZING, one rule for every asset.
+   --lg-a is the MEASURED ink aspect (logos.json), not the canvas aspect.
+   The image box is cut to that aspect at a fixed INK HEIGHT and filled with
+   object-fit:cover, so the ink renders exactly --lg-ih tall whatever padding
+   the asset carries. Before this, size came from the canvas: PostHog's ink is
+   17% of its canvas height, so it rendered 3px tall in the hero while a tight
+   asset next to it rendered 56px. Never reintroduce a fixed square here.
+   Wordmarks (.wm) get cap height, 0.60 of icon height -- a 5.9:1 lockup at
+   full icon height is visually enormous. */
+.int-ld{--lg-ih:2.4cqw; --lg-pill-ih:2.083cqw}
+.int-ld.wm{--lg-ih:1.44cqw; --lg-pill-ih:1.25cqw}
+.int-ld-tile{
+  width:3.056cqw; height:3.056cqw; border-radius:.556cqw; background:#fff;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  box-shadow:0 0 0 1px rgba(27,28,21,.05); overflow:hidden;
+}
+/* Wordmark chips widen to fit the ink plus the tile's own side padding. The
+   card is inline-flex, so a wider chip just widens the card; nothing reflows. */
+.int-ld.wm .int-ld-tile{width:calc(var(--lg-ih) * var(--lg-a) + 1.2cqw)}
+.int-ld-tile img{
+  height:var(--lg-ih); width:calc(var(--lg-ih) * var(--lg-a));
+  max-width:none; display:block; object-fit:cover;
+}
+.int-ld-mono{
+  display:flex; align-items:center; justify-content:center;
+  width:100%; height:100%; border-radius:inherit; color:#fff;
+  font-size:1.9cqw; font-weight:600; line-height:1; letter-spacing:.01em;
+}
+.int-ld-tile .int-ld-mono{border-radius:.556cqw}
+.int-ld-ctitle{font-size:2.361cqw; color:var(--ink); white-space:nowrap}
+.int-ld-chev{width:1.667cqw; height:1.667cqw; color:#2f2f2d; flex-shrink:0; transition:transform .3s ease}
+.int-ld-cardw.done .int-ld-chev{transform:rotate(90deg)}
+
+.int-ld-steps{position:absolute; left:16.667cqw; top:43.6cqw; display:flex; flex-direction:column; gap:0}
+.int-ld-strow{height:5cqw; display:flex; align-items:center; gap:2.153cqw}
+.int-ld-sicon{width:2.153cqw; height:2.153cqw; color:var(--step); flex-shrink:0; opacity:.13; transition:opacity .3s ease}
+.int-ld-strow.on .int-ld-sicon{opacity:1}
+.int-ld-slabel{font-size:2.361cqw; color:var(--step); white-space:nowrap; opacity:0; transition:opacity .3s ease}
+.int-ld-strow.on .int-ld-slabel{opacity:1}
+
+/* ---------- ACT 3: pill tab + app panel + the bird ---------- */
+.int-ld-pill{
+  position:absolute; left:6.597cqw; top:5.694cqw; height:3.542cqw;
+  display:inline-flex; align-items:center; gap:1.1cqw; padding:0 1.6cqw 0 1.1cqw;
+  background:#fff; border-radius:999px;
+  box-shadow:0 1px 2px rgba(27,28,21,.06),0 6px 18px rgba(27,28,21,.07);
+  font-size:2.083cqw; color:#1b1c15; white-space:nowrap;
+}
+.int-ld-pill .x{width:1.6cqw; height:1.6cqw; color:#6f6f6a; flex-shrink:0}
+.int-ld-pill .mark{
+  height:var(--lg-pill-ih); width:calc(var(--lg-pill-ih) * var(--lg-a));
+  flex-shrink:0; overflow:hidden; border-radius:.35cqw;
+}
+.int-ld-pill .x svg{width:100%; height:100%; display:block; object-fit:contain}
+.int-ld-pill .mark img{width:100%; height:100%; display:block; object-fit:cover}
+.int-ld-pill .mark .int-ld-mono{font-size:1.35cqw; border-radius:.35cqw}
+/* In the tab pill a wordmark carries the name itself, so the duplicate text
+   label is dropped -- "[PLAUD] Plaud" reads as a mistake. */
+.int-ld-panel{
+  position:absolute; left:5.556cqw; top:11.806cqw; width:89.236cqw; bottom:-2cqw;
+  background:#fff; border:1px solid var(--panel-line);
+  border-radius:1.667cqw 1.667cqw 0 0; overflow:hidden;
+}
+/* Title top 4.51cqw and rows top 10.42cqw are the reference frame's own
+   spacing (title y235, first row band starts y320, panel top y170). The
+   reference has NO subtitle under the title -- `meta` is an opt-in line used
+   only by panel types that genuinely need a qualifier, and it shifts the rows
+   down rather than crowding them. */
+.int-ld-ptitle{position:absolute; left:5.556cqw; top:4.51cqw; font-size:3.194cqw; font-weight:600; letter-spacing:-.01em; color:#1b1c15; white-space:nowrap}
+.int-ld-pmeta{position:absolute; left:5.556cqw; top:9.1cqw; font-size:1.94cqw; color:var(--muted); white-space:nowrap}
+.int-ld-rows{position:absolute; left:5.556cqw; right:5.556cqw; top:10.42cqw}
+.int-ld-panel.hasmeta .int-ld-rows{top:13.4cqw}
+.int-ld-prow{
+  display:flex; align-items:center; gap:1.18cqw; padding:1.37cqw 0; line-height:1.4;
+  border-bottom:1px solid rgba(27,28,21,.07);
+  opacity:0; transform:translateY(.5cqw); transition:opacity .3s ease, transform .3s ease;
+}
+.int-ld-prow.on{opacity:1; transform:none}
+.int-ld-pwhat{font-size:2.361cqw; color:#1b1c15; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.int-ld-pwho{font-size:2.083cqw; color:var(--muted); flex-shrink:0; white-space:nowrap}
+/* nowrap is load-bearing: at 6.2cqw "LB-241" wrapped to two lines and pushed
+   the row to 8.66cqw against the reference's 6.04cqw. */
+.int-ld-pid{font-size:2.083cqw; color:var(--muted); flex-shrink:0; white-space:nowrap; font-variant-numeric:tabular-nums}
+
+/* -- per-panel-type row internals -------------------------------------- */
+/* issues: status ring + mono key + title + assignee */
+.int-ld-p-issues .int-ld-pid{width:7.6cqw}
+.int-ld-dot{width:2.361cqw; height:2.361cqw; border-radius:50%; border:.174cqw solid var(--muted); flex-shrink:0}
+.int-ld-dot.prog{border-color:var(--amber)}
+.int-ld-dot.rev{border-color:var(--indigo)}
+/* checks: checkbox circle, amber when overdue */
+.int-ld-box{width:2.361cqw; height:2.361cqw; border-radius:50%; border:.174cqw solid var(--muted); flex-shrink:0}
+.int-ld-box.due{border-color:var(--amber)}
+.int-ld-chip{
+  font-size:1.8cqw; color:var(--muted); flex-shrink:0; white-space:nowrap;
+  border:1px solid rgba(27,28,21,.1); border-radius:.7cqw; padding:.2cqw .8cqw;
+}
+/* mail: sender in medium weight, subject grey-ish, day right */
+.int-ld-from{font-size:2.222cqw; color:#1b1c15; font-weight:600; flex-shrink:0; width:16cqw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.int-ld-p-mail .int-ld-pwhat{color:#3d3f38}
+/* docs: doc tile + title + grey snippet under it */
+.int-ld-p-docs .int-ld-prow{align-items:flex-start}
+.int-ld-dtile{width:2.8cqw; height:2.8cqw; border-radius:.4cqw; background:#f2f0ea; flex-shrink:0; margin-top:.2cqw}
+.int-ld-dstack{display:flex; flex-direction:column; gap:.35cqw; min-width:0; flex:1}
+.int-ld-dsnip{font-size:1.94cqw; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+/* events: left time column, tabular */
+.int-ld-time{font-size:2.222cqw; color:#1b1c15; flex-shrink:0; width:8.5cqw; font-variant-numeric:tabular-nums}
+/* repos: state glyph + mono number + title + branch chip */
+.int-ld-p-repos .int-ld-pid{width:5.6cqw}
+.int-ld-st{width:2.1cqw; height:2.1cqw; border-radius:50%; flex-shrink:0; background:var(--green)}
+.int-ld-st.draft{background:var(--muted)}
+.int-ld-st.commit{background:transparent; border:.174cqw solid var(--muted); width:1.7cqw; height:1.7cqw}
+.int-ld-st.file{background:transparent; border:.174cqw solid var(--indigo); border-radius:.3cqw; width:1.8cqw; height:1.8cqw}
+.int-ld-branch{font-size:1.8cqw; color:var(--indigo); flex-shrink:0; white-space:nowrap; font-variant-numeric:tabular-nums}
+/* query: the figure IS the title, oversized, with supporting rows */
+.int-ld-p-query .int-ld-ptitle{font-size:6.6cqw; letter-spacing:-.03em; top:3.6cqw}
+.int-ld-p-query .int-ld-pmeta{top:11.4cqw}
+.int-ld-panel.hasmeta.int-ld-p-query .int-ld-rows{top:15.8cqw}
+.int-ld-p-query .int-ld-pwhat{color:var(--muted); flex:0 0 22cqw}
+.int-ld-p-query .int-ld-pval{font-size:2.361cqw; color:#1b1c15; font-variant-numeric:tabular-nums}
+/* cms: field-coverage chip, red when something is missing */
+.int-ld-flag{
+  font-size:1.8cqw; flex-shrink:0; white-space:nowrap; border-radius:.7cqw;
+  padding:.2cqw .8cqw; border:1px solid transparent;
+}
+.int-ld-flag.missing{color:var(--red); background:rgba(196,85,61,.09)}
+.int-ld-flag.ok{color:var(--green); background:rgba(47,143,91,.09)}
+/* files: type glyph + name + path + size */
+.int-ld-ftype{
+  font-size:1.6cqw; color:#fff; background:var(--muted); border-radius:.35cqw;
+  padding:.25cqw .6cqw; flex-shrink:0; text-transform:uppercase; letter-spacing:.04em;
+}
+.int-ld-fpath{font-size:1.94cqw; color:var(--muted); flex-shrink:0; white-space:nowrap}
+/* recordings: waveform bars */
+.int-ld-wave{display:flex; align-items:center; gap:.28cqw; flex-shrink:0; width:2.8cqw; height:2.4cqw}
+.int-ld-wave i{display:block; width:.4cqw; background:var(--muted); border-radius:.2cqw}
+/* board: status pill */
+.int-ld-pillst{
+  font-size:1.8cqw; color:#fff; border-radius:.7cqw; padding:.2cqw .9cqw;
+  flex-shrink:0; white-space:nowrap; background:var(--muted);
+}
+.int-ld-pillst.working{background:var(--amber)}
+.int-ld-pillst.stuck{background:var(--red)}
+.int-ld-pillst.done{background:var(--green)}
+/* ping: one centred status line, deliberately no result rows */
+.int-ld-p-ping .int-ld-rows{top:12cqw}
+/* kv: label/value detail read-out, used by "open that one" beats */
+.int-ld-klabel{font-size:2.083cqw; color:var(--muted); flex:0 0 20cqw; white-space:nowrap}
+.int-ld-p-kv .int-ld-pwhat{white-space:normal}
+
+/* ---------- the bird ---------- */
+/* Start = reference frame 07 (abs left 6.60cqw, top 59.03cqw). End = frame 09,
+   measured bbox abs left 72.15 / top 18.19, 8.06 x 7.22cqw -- to the RIGHT OF
+   THE TITLE, clear of the rows. Values are panel-relative AND pre-compensated
+   for rotation: a rotated box's visual extent is ~1.1x its layout box and sits
+   ~0.5cqw up and left, so the silhouette lands on the reference coords. */
+.int-ld-bird{
+  position:absolute; width:7.26cqw; color:#1B1C15;
+  left:1.04cqw; top:47.22cqw; opacity:0; transform:rotate(-6deg);
+  transition:opacity .5s ease, left 2.2s cubic-bezier(.4,0,.3,1), top 2.2s cubic-bezier(.4,0,.3,1), transform 2.2s ease;
+}
+.int-ld-bird.on{opacity:1}
+.int-ld-bird.flew{left:66.49cqw; top:6.37cqw; transform:rotate(-8deg)}
+.int-ld-bird svg{width:100%; height:auto; display:block}
+
+/* ---------- the play affordance, now invisible ---------- */
+/* The foot and its Replay control are gone (the founder, 2026-08-28: nothing
+   visible around the demo). What remains is a stage-sized transparent button,
+   active ONLY in the settled state.
+
+   THE iOS CASE this protects: a reduced-motion viewer -- which on iOS includes
+   anyone in Low Power Mode -- gets a settled still frame. Previously a visible
+   "Play" pill said it was a still and not a broken embed. That pill is now
+   disallowed, so the whole stage is the target instead. Keep it a real button:
+   it stays keyboard reachable and shows a focus ring, which is the only visible
+   affordance left and only when a keyboard user asks for it. */
+.int-ld-tap{
+  position:absolute; inset:0; z-index:3; border:0; margin:0; padding:0;
+  background:transparent; cursor:pointer; font:inherit; color:inherit;
+  display:none; -webkit-tap-highlight-color:transparent;
+}
+.int-ld.is-idle .int-ld-tap{display:block}
+.int-ld-tap:focus-visible{outline:2px solid #2D6CC0; outline-offset:-3px; border-radius:.75rem}
+
+@media (max-width:600px){
+  .int-ld{width:100%; left:0; transform:none; margin:1.5rem 0 1.75rem}
+  /* The stage is a scaled-down 4:3 product screen, so on a phone every cqw
+     size shrinks with it and the smallest labels land under 9px. Floor them.
+     Raising the floor makes long row text ellipsize sooner, which is the right
+     trade: truncated-but-readable beats complete-but-illegible. */
+  .int-ld-ctext,.int-ld-slabel,.int-ld-pwhat,.int-ld-bub,
+  .int-ld-from,.int-ld-time,.int-ld-pval{font-size:max(12px,2.361cqw)}
+  .int-ld-pid,.int-ld-pwho,.int-ld-chip,.int-ld-branch,.int-ld-flag,.int-ld-klabel,
+  .int-ld-fpath,.int-ld-pmeta,.int-ld-dsnip,.int-ld-ftype,.int-ld-pillst{font-size:max(10px,1.94cqw)}
+  .int-ld-ptitle{font-size:max(15px,3.194cqw)}
+  .int-ld-p-query .int-ld-ptitle{font-size:max(24px,6.6cqw)}
+  /* The fixed cqw widths on the mono columns are correct at desktop, where
+     they hold the reference's alignment, but the floored font above overflows
+     them on a phone and the id ran into the title. Let content size them and
+     keep a real gap instead. */
+  .int-ld-p-issues .int-ld-pid,.int-ld-p-repos .int-ld-pid{width:auto}
+  .int-ld-klabel{flex:0 0 auto; min-width:9ch}
+  .int-ld-prow{gap:max(7px,1.18cqw)}
+  .int-ld-from{width:auto; max-width:38%}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .int-ld-act,.int-ld-cardw,.int-ld-bub,.int-ld-strow .int-ld-sicon,
+  .int-ld-strow .int-ld-slabel,.int-ld-prow,.int-ld-bird{transition:none !important}
+  /* the orbiting ring is the one thing here that loops forever -- stop it dead */
+  .int-ld-cardw.run::before{animation:none !important}
+}
+</style>
+<script>
+var DEMOS = {"linear":{"name":"Linear","icon":{"mono":"L","accent":"#e2a336","aspect":1.0},"panel":"issues","video":false,"alt":"A simulated Kestrel session on the Linear integration. Asked \"What's still open on the Mobile team?\", Kestrel works through checking Linear connection, listing issues on the Mobile team, reading comments on LB-241, then shows the result in a issues panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's still open on the Mobile team?","card":"Reading Linear","steps":[["find","Checking Linear connection"],["doc","Listing issues on the Mobile team"],["note","Reading comments on LB-241"]],"panel":{"title":"Mobile","rows":[["prog","LB-241","Offline sync drops queued edits","Priya"],["","LB-238","Push token refresh fails on reinstall","Marco"],["rev","LB-233","Crash on cold start, Android 14","Priya"]]}}]},"gmail":{"name":"Gmail","icon":{"mono":"G","accent":"#c4553d","aspect":1.0},"panel":"mail","video":true,"alt":"A simulated Kestrel session on the Gmail integration. Asked \"Anything from Northwind I still owe a reply to?\", Kestrel works through checking Gmail connection, searching both connected accounts, reading the Northwind thread, then shows the result in a mail panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Anything from Northwind I still owe a reply to?","card":"Reading Gmail","steps":[["find","Checking Gmail connection"],["mail","Searching both connected accounts"],["note","Reading the Northwind thread"]],"panel":{"title":"Northwind","meta":"2 accounts searched","rows":[["Dana Whitfield","Re: contract redlines, one open question","Tue"],["Dana Whitfield","Redlines attached for your review","Mon"],["you","Redlines coming back today","Mon"]]}},{"q":"And the open loop in it?","card":"Reading Gmail","steps":[["note","Reading the last message in the thread"],["find","Surfacing what is unanswered"]],"panel":{"kind":"kv","title":"Open loop","meta":"from Dana, Tue","rows":[["Dana asked","which entity signs, Northwind US or EU",""],["Unanswered since","Tuesday",""]]}}]},"notion":{"name":"Notion","icon":{"mono":"N","accent":"#d0557a","aspect":1.0},"panel":"docs","video":true,"alt":"A simulated Kestrel session on the Notion integration. Asked \"What did we write down about the rate limit decision?\", Kestrel works through checking Notion connection, searching your workspace, pulling the page, then shows the result in a docs panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What did we write down about the rate limit decision?","card":"Reading Notion","steps":[["find","Checking Notion connection"],["doc","Searching your workspace"],["note","Pulling the page"]],"panel":{"title":"Search results","meta":"3 matches","rows":[["API rate limits, decided","Engineering / Decisions","the 600/min ceiling and why"],["Platform RFC 014","Engineering / RFCs","original proposal, superseded"],["Q3 planning notes","Product","one line on limits, no detail"]]}},{"q":"Just the decision itself.","card":"Reading Notion","steps":[["doc","Pulling the full page content"]],"panel":{"kind":"kv","title":"API rate limits, decided","meta":"Engineering / Decisions","rows":[["Ceiling","600 requests per minute per workspace",""],["Rationale","p99 burst was 540, headroom kept deliberate",""],["Revisit","when a single tenant passes 400 sustained",""]]}}]},"todoist":{"name":"Todoist","icon":{"mono":"T","accent":"#1f9e8a","aspect":1.0},"panel":"checks","video":true,"alt":"A simulated Kestrel session on the Todoist integration. Asked \"Due today?\", Kestrel works through checking Todoist connection, finding tasks due today, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Due today?","card":"Reading Todoist","steps":[["find","Checking Todoist connection"],["check","Finding tasks due today"]],"panel":{"title":"Today","meta":"4 tasks","rows":[["","Revised SOW for Northwind","Work"],["","Review Priya's PR","Work"],["due","Renew domain","Admin"],["","Book the dentist","Personal"]]}},{"q":"Which project is the heaviest right now?","card":"Reading Todoist","steps":[["doc","Finding your projects"],["check","Getting an overview"]],"panel":{"title":"Projects","meta":"by open tasks","rows":[["","Work","18 open"],["","Admin","6 open"],["","Personal","4 open"]]}}]},"github":{"name":"GitHub","icon":{"mono":"G","accent":"#e2a336","aspect":1.0},"panel":"repos","video":false,"alt":"A simulated Kestrel session on the GitHub integration. Asked \"Open PRs on the web repo?\", Kestrel works through checking GitHub connection, listing open pull requests, then shows the result in a repos panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Open PRs on the web repo?","card":"Reading GitHub","steps":[["find","Checking GitHub connection"],["repo","Listing open pull requests"]],"panel":{"title":"acme/web","meta":"3 open","rows":[["open","#812","Cache the settings query","priya/cache-settings"],["draft","#809","Extract the mailer into a job","marco/mailer-job"],["open","#804","Bump the client to 4.2","deps/client-4-2"]]}},{"q":"What's actually in 812?","card":"Reading GitHub","steps":[["repo","Reading the pull request details"],["note","Listing the commits on it"]],"panel":{"title":"#812 Cache the settings query","meta":"priya/cache-settings","rows":[["commit","a3f1c0","Settings cache read path",""],["commit","77bd42","Invalidation on workspace update",""],["commit","e10a95","Test coverage for invalidation",""]]}},{"q":"Anything touching the auth module?","card":"Reading GitHub","steps":[["find","Searching code across your repositories"]],"panel":{"kind":"docs","title":"Code search","meta":"auth module","rows":[["lib/auth/session.rb","touched by #809","3 matches"],["lib/auth/tokens.rb","no open PR","1 match"]]}}]},"clickup":{"name":"ClickUp","icon":{"mono":"C","accent":"#e2a336","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the ClickUp integration. Asked \"How is the Platform space laid out?\", Kestrel works through checking ClickUp connection, reading the workspace structure, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"How is the Platform space laid out?","card":"Reading ClickUp","steps":[["find","Checking ClickUp connection"],["doc","Reading the workspace structure"]],"panel":{"title":"Platform","meta":"space, 3 lists","rows":[["","Ingest pipeline","12 tasks"],["","Query layer","9 tasks"],["","Runbooks","4 tasks"]]}},{"q":"What's blocked in the query layer?","card":"Reading ClickUp","steps":[["check","Filtering tasks by status"],["note","Reading the comments on them"]],"panel":{"title":"Query layer","meta":"status: blocked","rows":[["due","Partition the events table","waiting on infra"],["due","Backfill the Q2 range","blocked by the above"]]}}]},"asana":{"name":"Asana","icon":{"mono":"A","accent":"#3b7dd8","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the Asana integration. Asked \"What's on me this week?\", Kestrel works through checking Asana connection, surfacing your own tasks, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's on me this week?","card":"Reading Asana","steps":[["find","Checking Asana connection"],["check","Surfacing your own tasks"]],"panel":{"title":"My tasks","meta":"this week","rows":[["due","Write the migration runbook","Thu"],["","Review the vendor security questionnaire","Fri"],["","Sign off on the Q3 brief","Fri"]]}},{"q":"How does Platform look overall?","card":"Reading Asana","steps":[["doc","Surfacing your projects"],["note","Reading the project details"]],"panel":{"kind":"kv","title":"Platform","meta":"project","rows":[["Owner","you"],["Open tasks","14, three due this week"],["Status","on track, cutover set for the 14th"]]}}]},"plaud":{"name":"Plaud","icon":{"mono":"P","accent":"#1f9e8a","aspect":1.0},"panel":"recordings","video":false,"alt":"A simulated Kestrel session on the Plaud integration. Asked \"Find the recording where we argued about pricing.\", Kestrel works through checking Plaud connection, listing your recordings, then shows the result in a recordings panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Find the recording where we argued about pricing.","card":"Reading Plaud","steps":[["find","Checking Plaud connection"],["rec","Listing your recordings"]],"panel":{"title":"Recordings","meta":"3 matches","rows":[["","Pricing working session","48m, Tue"],["","Weekly product sync","31m, Mon"],["","Northwind discovery call","52m, last Thu"]]}},{"q":"What did the note say?","card":"Reading Plaud","steps":[["note","Retrieving the note for that recording"]],"panel":{"kind":"kv","title":"Pricing working session","meta":"AI note, 48m","rows":[["Decision","hold the entry price, add a usage tier",""],["Open","who owns the migration comms",""],["Next","revisit after the Northwind renewal",""]]}},{"q":"Read me the exact line about the usage tier.","card":"Reading Plaud","steps":[["rec","Retrieving the full transcript"]],"panel":{"kind":"events","title":"Transcript","meta":"Pricing working session","rows":[["18:42","so the usage tier sits above Plus, not beside it",""],["18:51","and it does not touch the entry price at all",""]]}}]},"ticktick":{"name":"TickTick","icon":{"mono":"T","accent":"#1f9e8a","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the TickTick integration. Asked \"Show me what's overdue.\", Kestrel works through checking TickTick connection, finding tasks by due date, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Show me what's overdue.","card":"Reading TickTick","steps":[["find","Checking TickTick connection"],["check","Finding tasks by due date"]],"panel":{"title":"Overdue","meta":"2 tasks","rows":[["due","Chase the insurance renewal","Admin"],["due","Tax docs for Marco","Admin"]]}},{"q":"Open the insurance one.","card":"Reading TickTick","steps":[["doc","Reading the full task details"]],"panel":{"kind":"kv","title":"Chase the insurance renewal","meta":"Admin, was due Monday","rows":[["Priority","high",""],["Notes","policy number is on the Feb statement",""],["List","Admin",""]]}}]},"outlook":{"name":"Outlook","icon":{"mono":"O","accent":"#8e5bd0","aspect":1.0},"panel":"mail","video":false,"alt":"A simulated Kestrel session on the Outlook integration. Asked \"Did the signed order form ever come back from procurement?\", Kestrel works through checking Outlook connection, searching your inbox, checking the attachments on it, then shows the result in a mail panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Did the signed order form ever come back from procurement?","card":"Reading Outlook","steps":[["find","Checking Outlook connection"],["mail","Searching your inbox"],["note","Checking the attachments on it"]],"panel":{"title":"Procurement","meta":"4 results","rows":[["Ines Vogel","Signed order form attached","Wed"],["Ines Vogel","Re: order form, one correction","Tue"],["noreply","Approval routed to procurement","Mon"]]}},{"q":"What's attached to Wednesday's?","card":"Reading Outlook","steps":[["mail","Reading the message"],["doc","Listing its attachments"]],"panel":{"kind":"files","title":"Signed order form attached","meta":"from Ines Vogel, Wed","rows":[["pdf","order-form-signed.pdf","","412 KB"],["pdf","w9-northwind.pdf","","88 KB"]]}}]},"google-drive":{"name":"Google Drive","icon":{"mono":"G","accent":"#3b7dd8","aspect":1.0},"panel":"docs","video":false,"alt":"A simulated Kestrel session on the Google Drive integration. Asked \"Find the deck where we sized the market.\", Kestrel works through checking Google Drive connection, finding the file, then shows the result in a docs panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Find the deck where we sized the market.","card":"Reading Google Drive","steps":[["find","Checking Google Drive connection"],["doc","Finding the file"]],"panel":{"title":"Results","meta":"2 files","rows":[["Market sizing v4","Slides, edited last Thu","the numbers we presented"],["Market sizing scratch","Sheets, edited in March","working cells, superseded"]]}},{"q":"What number did v4 actually land on?","card":"Reading Google Drive","steps":[["doc","Reading what's in it"]],"panel":{"title":"Market sizing v4","meta":"Slides","rows":[["Slide 6","serviceable market, 1.8B","bottom-up, seats times price"],["Slide 7","reachable in 3 years, 240M","assumes current channel mix"]]}}]},"monday-com":{"name":"monday.com","icon":{"mono":"M","accent":"#3b7dd8","aspect":1.0},"panel":"board","video":false,"alt":"A simulated Kestrel session on the monday.com integration. Asked \"What's actually on the launch board this week?\", Kestrel works through checking monday.com connection, finding the board, reading the items on it, then shows the result in a board panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's actually on the launch board this week?","card":"Reading monday.com","steps":[["find","Checking monday.com connection"],["board","Finding the board"],["note","Reading the items on it"]],"panel":{"title":"Launch","meta":"This week group","rows":[["working","Press release copy","Dana"],["stuck","Pricing page update","Marco"],["done","Support macros","Priya"]]}},{"q":"Which one is stuck?","card":"Reading monday.com","steps":[["board","Reading the item's columns"]],"panel":{"kind":"kv","title":"Pricing page update","meta":"Launch board","rows":[["Status","stuck, owned by Marco"],["Blocked by","legal review of the usage tier wording"],["Timeline","was this week, now unset"]]}}]},"webflow":{"name":"Webflow","icon":{"mono":"W","accent":"#1f9e8a","aspect":1.0},"panel":"cms","video":false,"alt":"A simulated Kestrel session on the Webflow integration. Asked \"Which blog posts are missing an SEO title?\", Kestrel works through checking Webflow connection, looking at the Blog Posts collection, checking which items are missing the field, then shows the result in a cms panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Which blog posts are missing an SEO title?","card":"Reading Webflow","steps":[["find","Checking Webflow connection"],["cms","Looking at the Blog Posts collection"],["note","Checking which items are missing the field"]],"panel":{"title":"Blog Posts","meta":"3 of 48 missing SEO title","rows":[["missing","How we think about context","no SEO title"],["missing","Changelog, July","no SEO title"],["missing","Hiring an ops lead","no SEO title"]]}},{"q":"Anything else thin on that collection?","card":"Reading Webflow","steps":[["cms","Looking at the rest of the fields"]],"panel":{"title":"Blog Posts","meta":"field coverage","rows":[["ok","Slug, author, body","48 of 48"],["missing","Open graph image","11 of 48 missing"],["ok","Category","48 of 48"]]}}]},"axiom":{"name":"Axiom","icon":{"mono":"A","accent":"#1f9e8a","aspect":1.0},"panel":"query","video":false,"alt":"A simulated Kestrel session on the Axiom integration. Asked \"Pull the error rate overnight.\", Kestrel works through checking Axiom connection, querying the dataset, then shows the result in a query panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Pull the error rate overnight.","card":"Reading Axiom","steps":[["find","Checking Axiom connection"],["query","Querying the dataset"]],"panel":{"title":"0.42%","meta":"error rate, 00:00 to 08:00","rows":[["Requests","1,284,900",""],["Errors","5,397",""],["Peak","1.9% at 03:10",""]]}},{"q":"What was it the night before?","card":"Reading Axiom","steps":[["query","Querying the same window"]],"panel":{"title":"0.11%","meta":"error rate, previous night","rows":[["Requests","1,190,440",""],["Errors","1,309",""],["Change","up 0.31 points overnight",""]]}}]},"dropbox":{"name":"Dropbox","icon":{"mono":"D","accent":"#1f9e8a","aspect":1.0},"panel":"files","video":false,"alt":"A simulated Kestrel session on the Dropbox integration. Asked \"Where's the signed Northwind MSA?\", Kestrel works through checking Dropbox connection, searching files and folders, then shows the result in a files panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Where's the signed Northwind MSA?","card":"Reading Dropbox","steps":[["find","Checking Dropbox connection"],["file","Searching files and folders"]],"panel":{"title":"Results","meta":"2 files","rows":[["pdf","Northwind MSA signed.pdf","/Contracts/2026","1.2 MB"],["pdf","Northwind MSA draft.pdf","/Contracts/drafts","1.1 MB"]]}},{"q":"Has the signed one changed since February?","card":"Reading Dropbox","steps":[["file","Listing the file revisions"]],"panel":{"title":"Northwind MSA signed.pdf","meta":"3 revisions","rows":[["rev","Current","12 Feb","1.2 MB"],["rev","Previous","9 Feb","1.2 MB"],["rev","First","9 Feb","1.1 MB"]]}}]},"posthog":{"name":"PostHog","icon":{"mono":"P","accent":"#3b7dd8","aspect":1.0},"panel":"query","video":false,"alt":"A simulated Kestrel session on the PostHog integration. Asked \"What happened to signups last week?\", Kestrel works through checking PostHog connection, running the query, then shows the result in a query panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What happened to signups last week?","card":"Reading PostHog","steps":[["find","Checking PostHog connection"],["query","Running the query"]],"panel":{"title":"1,847","meta":"signups, last 7 days","rows":[["Week before","1,612",""],["Change","up 235",""],["Best day","Tuesday, 342",""]]}},{"q":"Which channel drove most of them?","card":"Reading PostHog","steps":[["doc","Opening the saved insight"]],"panel":{"title":"742","meta":"organic search, from the Signups by source insight","rows":[["Direct","531",""],["Referral","398",""],["Paid","176",""]]}},{"q":"And the pricing page experiment?","card":"Reading PostHog","steps":[["query","Reading the experiment results"]],"panel":{"title":"5.3%","meta":"variant B, pricing page test over 14 days","rows":[["Control","4.1% conversion",""],["Lift","up 1.2 points",""],["Exposure","18,402 users",""]]}}]}};
+
+(function () {
+  'use strict';
+  /* Hero lockup ink heights, in px. The Kestrel bird is a tight-viewBox SVG
+     in a 74x56 contain box, so it renders exactly 56px tall -- that is the
+     parity reference, measured, not chosen. Wordmarks take cap height at
+     HERO_CAP_H; matching a 5.9:1 lockup to a pictorial glyph's full height
+     would be visually enormous. Tune HERO_CAP_H if the balance reads off. */
+  var HERO_ICON_H = 56;
+  var HERO_CAP_H = 33;
+  var parts = location.pathname.split('/').filter(Boolean);
+  var slug = parts[parts.length - 1] || '';
+  var D = DEMOS[slug];
+  if (!D) return;                       /* generic pages get nothing */
+
+  /* ---- HERO LOCKUP, normalised first and unconditionally ----
+     The hero is the "bird x partner" pairing above the H1. It is Webflow
+     markup bound to the CMS logo field, sized `width:74px; height:56px;
+     object-fit:contain` for every tool alike -- so a partner logo rendered at
+     1/aspect of its canvas. PostHog measured 9.7px tall beside a 56px bird.
+     Here the partner box is recut to the MEASURED ink aspect at a fixed ink
+     height, so every mark renders the same height as the bird (wordmarks at
+     cap height). Runs before the video early-return on purpose: the three
+     video spokes have the same hero and deserve the same fix. */
+  (function normaliseHero() {
+    if (!D.hero) return;
+    var lock = document.querySelector('.int-hero .int-lockup, .section_hero .int-lockup');
+    if (!lock) return;
+    var marks = lock.querySelectorAll('.int-lockup-logo');
+    if (marks.length < 2) return;       /* no partner mark to size */
+    var partner = marks[marks.length - 1];
+    /* Swap the asset where the CMS field holds the wrong variant (ClickUp).
+       See hero_for() in build.py for why this is not a CMS edit. */
+    if (D.hero.src) partner.src = D.hero.src;
+    var H = D.hero.wm ? HERO_CAP_H : HERO_ICON_H;
+    partner.style.height = H + 'px';
+    partner.style.width = (H * D.hero.aspect).toFixed(1) + 'px';
+    partner.style.objectFit = 'cover';
+    partner.style.maxWidth = 'none';
+  })();
+
+  if (document.querySelector('.int-ld')) return;
+  /* Real footage wins. gmail / notion / todoist have a self-hosted demo video
+     that the template's head code injects into this same hero slot; a coded
+     recreation of the product next to a real recording of it would be two
+     "see it work" visuals in one hero. Flag lives in demos.py. The element
+     check is belt and braces: the video injector and this script both run on
+     DOMContentLoaded and their order is not guaranteed. */
+  if (D.video) return;                  /* real footage wins -- see demos.py */
+  if (document.querySelector('video.int-demo-video')) return;
+
+  var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduce = !!(mq && mq.matches);
+
+  var ICON = {
+    find: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>',
+    doc:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M8.5 12.5h7M8.5 16h7"/></svg>',
+    note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15.5A1.5 1.5 0 0 1 18.5 17H8l-4 4V5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>',
+    cal:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/></svg>',
+    repo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2.5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="12" r="2.5"/><path d="M7 8.5v7M9.5 6h3a2 2 0 0 1 2 2v2"/></svg>',
+    query:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="m7 15 3.5-4 3 2.5L20 7"/></svg>',
+    cms:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="5" rx="1.5"/><rect x="3.5" y="12" width="17" height="8" rx="1.5"/></svg>',
+    file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l2 2.5h7A1.5 1.5 0 0 1 20 10v7.5A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/></svg>',
+    rec:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10v4M9 7v10M13 9v6M17 11v2M21 10v4"/></svg>',
+    board:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M15 4.5v15"/></svg>'
+  };
+  var SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
+  var MIC  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>';
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+  var XG   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  var BIRD = '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 4 L58 40 L94 48 L58 56 L50 92 L42 56 L6 48 L42 40 Z"/></svg>';
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function reveal(el) { void el.offsetWidth; el.classList.add('on'); }
+  /* the app icon: the site's OWN asset for this tool, never hand-drawn. An
+     earlier build drew Linear's mark from memory and shipped a purple blob.
+     Where no square asset exists, a monogram tile in the tool's accent -- the
+     square shape the reference videos actually show. */
+  /* Every logo is sized from its MEASURED ink box, never from its canvas.
+     --lg-a is the ink aspect; the .wm class switches to cap-height treatment.
+     The image always uses object-fit:cover inside a box cut to the ink aspect,
+     which makes the ink fill the box exactly -- verified for all 17 assets: 14
+     are centre-padded and the other two are off-centre by 1-5%, which crops
+     invisibly. That is why no wrapper and no negative offset is needed. */
+  function markHTML() {
+    /* monogram: documented last resort, no tool uses it today */
+    if (D.icon.mono) {
+      return '<span class="int-ld-mono" style="background:' + esc(D.icon.accent) +
+             '">' + esc(D.icon.mono) + '</span>';
+    }
+    return '<img alt="" decoding="async" src="' + esc(D.icon.url) + '">';
+  }
+  /* a wordmark IS the name; showing both reads as a bug */
+  function pillLabel() { return D.icon.wm ? '' : esc(D.name); }
+
+  /* ---- panel renderers. One per family, so the internals differ while the
+     surrounding chrome does not. Each takes a row array and returns cells. --- */
+  var PANEL = {
+    issues: function (r) {
+      return '<span class="int-ld-dot ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pid">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[2]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[3]) + '</span>';
+    },
+    checks: function (r) {
+      return '<span class="int-ld-box ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             (r[2] ? '<span class="int-ld-chip">' + esc(r[2]) + '</span>' : '');
+    },
+    mail: function (r) {
+      return '<span class="int-ld-from">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    docs: function (r) {
+      return '<span class="int-ld-dtile"></span><span class="int-ld-dstack">' +
+             '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-dsnip">' + esc(r[1]) +
+             (r[2] ? ' &middot; ' + esc(r[2]) : '') + '</span></span>';
+    },
+    events: function (r) {
+      return '<span class="int-ld-time">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    repos: function (r) {
+      return '<span class="int-ld-st ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pid">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[2]) + '</span>' +
+             (r[3] ? '<span class="int-ld-branch">' + esc(r[3]) + '</span>' : '');
+    },
+    query: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pval">' + esc(r[1]) + '</span>';
+    },
+    cms: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-flag ' + esc(r[0]) + '">' + esc(r[2]) + '</span>';
+    },
+    files: function (r) {
+      return '<span class="int-ld-ftype">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             (r[2] ? '<span class="int-ld-fpath">' + esc(r[2]) + '</span>' : '') +
+             (r[3] ? '<span class="int-ld-pwho">' + esc(r[3]) + '</span>' : '');
+    },
+    recordings: function (r) {
+      return '<span class="int-ld-wave"><i style="height:40%"></i>' +
+             '<i style="height:85%"></i><i style="height:60%"></i>' +
+             '<i style="height:100%"></i><i style="height:45%"></i></span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    board: function (r) {
+      return '<span class="int-ld-pillst ' + esc(r[0]) + '">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    ping: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[1]) + '</span>';
+    },
+    /* Detail views. A real product does not render "open one item" with the
+       same row template as the list it came from, so a beat can override the
+       demo's panel type with kind:'kv' and get a label/value read-out. This is
+       also what keeps the four task-list tools from looking like each other:
+       their list beats share a renderer, their detail beats do not. */
+    kv: function (r) {
+      return '<span class="int-ld-klabel">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>';
+    }
+  };
+
+  var root = document.createElement('div');
+  root.className = D.icon.wm ? 'int-ld wm' : 'int-ld';
+  root.style.setProperty('--lg-a', D.icon.aspect);
+  root.innerHTML =
+    /* No heading, no subline. the founder, 2026-08-28: the demo speaks for itself
+       and the wrapper text was noise. The stage's aria-label still carries the
+       full description, including "Read only; nothing is changed", so the
+       disclosure survives for assistive tech even though nothing is drawn. */
+    '<div class="int-ld-stage" role="img" aria-label="' + esc(D.alt) + '">' +
+      '<div class="int-ld-act int-ld-a1">' +
+        '<div class="int-ld-comp">' +
+          '<div class="int-ld-ctext"></div>' +
+          '<div class="int-ld-cbar">' +
+            '<div class="int-ld-plus">+</div>' +
+            '<div class="int-ld-mic">' + MIC + '</div>' +
+            '<div class="int-ld-send">' + SEND + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="int-ld-act int-ld-a2">' +
+        '<div class="int-ld-bub"></div>' +
+        '<div class="int-ld-cardw"><div class="int-ld-card">' +
+          '<span class="int-ld-tile">' + markHTML() + '</span>' +
+          '<span class="int-ld-ctitle">Gathering context</span>' +
+          '<span class="int-ld-chev">' + CHEV + '</span>' +
+        '</div></div>' +
+        '<div class="int-ld-steps"></div>' +
+      '</div>' +
+      '<div class="int-ld-act int-ld-a3">' +
+        '<div class="int-ld-pill"><span class="x">' + XG + '</span>' +
+          '<span class="mark">' + markHTML() + '</span>' + pillLabel() + '</div>' +
+        '<div class="int-ld-panel int-ld-p-' + esc(D.panel) + '">' +
+          '<div class="int-ld-ptitle"></div>' +
+          '<div class="int-ld-pmeta"></div>' +
+          '<div class="int-ld-rows"></div>' +
+          '<div class="int-ld-bird">' + BIRD + '</div>' +
+        '</div>' +
+      '</div>' +
+      /* Invisible, stage-sized tap target. the founder, 2026-08-28: nothing visible
+         around the demo, which took the foot's Replay control AND this button's
+         "Play" pill with it. The control still EXISTS -- it covers the stage, it
+         is a real <button> so it stays keyboard reachable, and it shows a focus
+         ring when tabbed to. It is only active in the settled state (.is-idle),
+         i.e. reduced-motion and scrolled-away, so it never swallows a click
+         while the demo is looping. */
+      '<button type="button" class="int-ld-tap" aria-label="Replay the demo">' +
+      '</button>' +
+    '</div>';
+
+  var q = function (s) { return root.querySelector(s); };
+  var a1 = q('.int-ld-a1'), a2 = q('.int-ld-a2'), a3 = q('.int-ld-a3'),
+      ctext = q('.int-ld-ctext'), bub = q('.int-ld-bub'),
+      card = q('.int-ld-cardw'), ctitle = q('.int-ld-ctitle'),
+      stepsBox = q('.int-ld-steps'), panel = q('.int-ld-panel'),
+      ptitle = q('.int-ld-ptitle'), pmeta = q('.int-ld-pmeta'),
+      rowsBox = q('.int-ld-rows'), bird = q('.int-ld-bird'),
+      stage = q('.int-ld-stage'), tap = q('.int-ld-tap');
+
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function only(act) {
+    [a1, a2, a3].forEach(function (x) { x.classList.toggle('on', x === act); });
+  }
+
+  /* Render one beat's step list and panel. Beats replace this content rather
+     than the markup being static, which is what lets a demo have 2 or 3
+     exchanges without three copies of the DOM. */
+  function paintSteps(beat) {
+    stepsBox.innerHTML = beat.steps.map(function (s) {
+      return '<div class="int-ld-strow"><span class="int-ld-sicon">' +
+             (ICON[s[0]] || ICON.find) + '</span>' +
+             '<span class="int-ld-slabel">' + esc(s[1]) + '</span></div>';
+    }).join('');
+    return stepsBox.querySelectorAll('.int-ld-strow');
+  }
+  function paintPanel(beat) {
+    var p = beat.panel;
+    var kind = p.kind || D.panel;        /* a beat may override the renderer */
+    var fn = PANEL[kind] || PANEL.issues;
+    /* keep the type class in step with the renderer, or the type-specific CSS
+       (the oversized query figure, the docs two-line row) lands on the wrong
+       markup. */
+    panel.className = 'int-ld-panel int-ld-p-' + kind;
+    ptitle.textContent = p.title;
+    pmeta.textContent = p.meta || '';
+    panel.classList.toggle('hasmeta', !!p.meta);
+    rowsBox.innerHTML = p.rows.map(function (r) {
+      return '<div class="int-ld-prow">' + fn(r) + '</div>';
+    }).join('');
+    return rowsBox.querySelectorAll('.int-ld-prow');
+  }
+
+  function resetAll() {
+    clearAll();
+    ctext.textContent = '';
+    bub.textContent = '';
+    bub.classList.remove('on');
+    card.className = 'int-ld-cardw';
+    ctitle.textContent = 'Gathering context';
+    stepsBox.innerHTML = '';
+    rowsBox.innerHTML = '';
+    ptitle.textContent = '';
+    pmeta.textContent = '';
+    bird.classList.remove('on', 'flew');
+    only(null);
+  }
+
+  /* The settled frame: last beat, everything in place. This is what a
+     reduced-motion viewer sees, and it is also the resting state after the
+     loop is stopped -- never a frozen mid-animation frame. */
+  function still() {
+    resetAll();
+    var last = D.beats[D.beats.length - 1];
+    bub.textContent = last.q;
+    bub.classList.add('on');
+    var rows = paintPanel(last);
+    Array.prototype.forEach.call(rows, function (r) { r.classList.add('on'); });
+    bird.classList.add('on', 'flew');
+    only(a3);
+    idle(true);
+  }
+
+  function idle(on) { root.classList.toggle('is-idle', !!on); }
+
+  /* Data-driven timeline. Beat 1 types into the composer; later beats skip
+     the composer, the way a real second question would. Every offset below is
+     the reference video's own pacing (33ms/char, ~400ms to the card, ~900ms
+     between step reveals, ~700ms before the cut, rows 600ms apart). */
+  function play() {
+    resetAll();
+    idle(false);
+    var t = 0;
+    D.beats.forEach(function (beat, i) {
+      var steps;
+      if (i === 0) {
+        only(a1);
+        t += 400;
+        at(t, function () {
+          only(a1);
+          var n = 0;
+          (function tick() {
+            ctext.textContent = beat.q.slice(0, ++n);
+            if (n < beat.q.length) at(33, tick);
+          })();
+        });
+        t += beat.q.length * 33 + 480;
+      } else {
+        t += 700;                        /* a breath between exchanges */
+      }
+      var tCut = t;
+      at(tCut, function () {
+        only(a2);
+        bub.textContent = beat.q;
+        reveal(bub);
+        card.className = 'int-ld-cardw';
+        ctitle.textContent = 'Gathering context';
+        steps = paintSteps(beat);
+      });
+      at(tCut + 400, function () {
+        card.classList.add('on');
+        at(60, function () { card.classList.add('run'); });
+      });
+      beat.steps.forEach(function (s, k) {
+        at(tCut + 1000 + k * 900, function () {
+          if (steps && steps[k]) steps[k].classList.add('on');
+        });
+      });
+      at(tCut + 1300, function () {
+        ctitle.textContent = beat.card;
+        card.classList.add('done');
+      });
+      var tPanel = tCut + 900 + beat.steps.length * 900 + 700;
+      at(tPanel, function () {
+        only(a3);
+        var rows = paintPanel(beat);
+        if (i === 0) {
+          bird.classList.add('on');
+          at(400, function () { bird.classList.add('flew'); });
+        } else {
+          bird.classList.add('on', 'flew');   /* already flown, stays put */
+        }
+        beat.panel.rows.forEach(function (_, k) {
+          at(400 + k * 600, function () {
+            if (rows[k]) rows[k].classList.add('on');
+          });
+        });
+      });
+      t = tPanel + 400 + beat.panel.rows.length * 600 + 1400;
+    });
+    at(t + 600, play);                   /* loop */
+  }
+
+  /* ---- start / stop -------------------------------------------------
+     THE iOS BUG. the founder saw a static frame on Chrome iOS. Cause, confirmed by
+     reading the shipped v2 source rather than guessing: `still()` ended with
+     `replay.style.display = 'none'`, and boot() called still() and returned
+     whenever prefers-reduced-motion matched. iOS sets that preference from
+     BOTH the Reduce Motion accessibility switch and Low Power Mode, and Chrome
+     iOS is WebKit underneath, so a phone on low battery got the settled frame
+     and literally no control -- indistinguishable from a broken embed.
+
+     Second, smaller defect on the same report: the old IntersectionObserver
+     called clearAll() when the stage left the viewport, which cancels timers
+     but leaves the DOM mid-animation. An iOS address-bar collapse or a
+     rubber-band scroll can fire enter-then-leave in quick succession, which
+     froze the demo on a half-typed question with no way back.
+
+     So: the settled frame stays (it is the right answer to the preference),
+     but it is now always accompanied by a visible Play control, leaving the
+     viewport SETTLES rather than freezes, and every way of arriving at "should
+     be playing but isn't" funnels through ensure().
+     -------------------------------------------------------------------- */
+  var running = false;
+  function start() {
+    if (running) return;
+    running = true;
+    play();
+  }
+  /* AUTO-start paths must never fire for a reduced-motion user; an explicit tap
+     still may, because that IS the user asking for motion. Hence the guard sits
+     here and at ensure(), not inside start() -- tapped() calls start() directly
+     and must keep working.
+
+     Why this exists: boot() returns early on reduce, so a user who loads the
+     page with reduce ON never reaches the observer or the visibilitychange
+     listener. But a user who turns reduce ON mid-session HAS both installed,
+     and both called start() unguarded -- so scrolling away and back, or
+     switching tabs and back, restarted the animation on someone who had just
+     asked their OS for less motion. Narrow, but a real regression path. */
+  function autoStart() {
+    if (reduce) return;
+    start();
+  }
+  function stop(settle) {
+    running = false;
+    clearAll();
+    if (settle) still();               /* never freeze mid-frame */
+  }
+  function inView() {
+    var r = stage.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.top < vh && r.bottom > 0;
+  }
+  /* The single recovery path. Safe to call as often as you like. */
+  function ensure() {
+    if (reduce || running) return;
+    if (inView()) autoStart();
+  }
+
+  function tapped() {
+    /* An explicit tap is explicit intent, so it plays even under reduced
+       motion -- the preference governs what happens unasked, not what the
+       viewer asks for. */
+    stop(false);
+    start();
+  }
+  tap.addEventListener('click', tapped);
+
+  function mount() {
+    var slot = document.querySelector('.int-hero .int-demo-media');
+    if (slot && slot.parentNode) { slot.parentNode.insertBefore(root, slot); return true; }
+    var ctr = document.querySelector('.int-hero .int-ctr');
+    if (!ctr) return false;
+    ctr.appendChild(root);
+    return true;
+  }
+
+  function boot() {
+    if (!mount()) return;
+
+    /* Reduced motion: the settled frame, plus a Play control. Never silent. */
+    if (reduce) { still(); return; }
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) autoStart();
+          else if (running) stop(true);
+        });
+      }, { threshold: 0.2 }).observe(stage);
+    } else {
+      autoStart();
+    }
+
+    /* Belt and braces for mobile WebKit, where a deferred or mis-timed first
+       IO callback has been seen to leave the stage blank: re-check shortly
+       after boot, then on scroll, then whenever the tab comes back. All three
+       land in ensure(), which no-ops if the loop is already running. */
+    setTimeout(ensure, 1200);
+    window.addEventListener('scroll', ensure, { passive: true });
+
+    document.addEventListener('visibilitychange', function () {
+      /* A backgrounded tab throttles setTimeout; returning to it would
+         otherwise dump the whole queue at once. Restart clean. */
+      if (document.hidden) { if (running) stop(true); }
+      else if (inView()) { stop(false); autoStart(); }
+    });
+
+    /* Honour a mid-session change to the motion preference -- on iOS this
+       fires when Low Power Mode switches on or off under the viewer. */
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', function (e) {
+        reduce = e.matches;
+        if (reduce) { stop(false); still(); } else { ensure(); }
+      });
+    }
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else { boot(); }
+})();
+</script>

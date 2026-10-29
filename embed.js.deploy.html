@@ -1,0 +1,378 @@
+<!-- "See it work" demo, ENGINE + DATA for 16 verified spokes. Styles are in
+     the sibling embed with domId int-ld-style.
+     SOURCE OF TRUTH: see-it-work/{demos.py,build.py}
+     Regenerate with `python3 build.py`; do not hand-edit.
+     CLAIMS: strings come from each tool's own claims doc section, READS ONLY.
+     Gates: gate.py -- re-run it if any string changes.
+     ICONS: every tool shows its REAL mark, sized from measured ink so all
+     13 render at one visual height. Audited 2026-08-24 and again 2026-08-28.
+     NO CHROME: no heading, no subline, no caption, no visible control
+     (the founder, 2026-08-28). The demo loops on its own; the only control is
+     a transparent stage-sized button, active in the settled state only.
+     LOGO SIZING is driven by each asset MEASURED ink box (logos.json),
+     never by its canvas: --lg-a is the ink aspect and .wm switches to cap
+     height. The hero lockup is normalised by the same numbers at runtime.
+     REDUCED MOTION: a user whose OS asks for less motion gets the settled
+     final transcript and NO auto-loop, ever. Every automatic start goes
+     through autoStart(), which refuses; only an explicit stage tap calls
+     start() directly, because that is the user asking for motion. -->
+<script>
+var DEMOS = {"linear":{"name":"Linear","icon":{"mono":"L","accent":"#e2a336","aspect":1.0},"panel":"issues","video":false,"alt":"A simulated Kestrel session on the Linear integration. Asked \"What's still open on the Mobile team?\", Kestrel works through checking Linear connection, listing issues on the Mobile team, reading comments on LB-241, then shows the result in a issues panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's still open on the Mobile team?","card":"Reading Linear","steps":[["find","Checking Linear connection"],["doc","Listing issues on the Mobile team"],["note","Reading comments on LB-241"]],"panel":{"title":"Mobile","rows":[["prog","LB-241","Offline sync drops queued edits","Priya"],["","LB-238","Push token refresh fails on reinstall","Marco"],["rev","LB-233","Crash on cold start, Android 14","Priya"]]}}]},"gmail":{"name":"Gmail","icon":{"mono":"G","accent":"#c4553d","aspect":1.0},"panel":"mail","video":true,"alt":"A simulated Kestrel session on the Gmail integration. Asked \"Anything from Northwind I still owe a reply to?\", Kestrel works through checking Gmail connection, searching both connected accounts, reading the Northwind thread, then shows the result in a mail panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Anything from Northwind I still owe a reply to?","card":"Reading Gmail","steps":[["find","Checking Gmail connection"],["mail","Searching both connected accounts"],["note","Reading the Northwind thread"]],"panel":{"title":"Northwind","meta":"2 accounts searched","rows":[["Dana Whitfield","Re: contract redlines, one open question","Tue"],["Dana Whitfield","Redlines attached for your review","Mon"],["you","Redlines coming back today","Mon"]]}},{"q":"And the open loop in it?","card":"Reading Gmail","steps":[["note","Reading the last message in the thread"],["find","Surfacing what is unanswered"]],"panel":{"kind":"kv","title":"Open loop","meta":"from Dana, Tue","rows":[["Dana asked","which entity signs, Northwind US or EU",""],["Unanswered since","Tuesday",""]]}}]},"notion":{"name":"Notion","icon":{"mono":"N","accent":"#d0557a","aspect":1.0},"panel":"docs","video":true,"alt":"A simulated Kestrel session on the Notion integration. Asked \"What did we write down about the rate limit decision?\", Kestrel works through checking Notion connection, searching your workspace, pulling the page, then shows the result in a docs panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What did we write down about the rate limit decision?","card":"Reading Notion","steps":[["find","Checking Notion connection"],["doc","Searching your workspace"],["note","Pulling the page"]],"panel":{"title":"Search results","meta":"3 matches","rows":[["API rate limits, decided","Engineering / Decisions","the 600/min ceiling and why"],["Platform RFC 014","Engineering / RFCs","original proposal, superseded"],["Q3 planning notes","Product","one line on limits, no detail"]]}},{"q":"Just the decision itself.","card":"Reading Notion","steps":[["doc","Pulling the full page content"]],"panel":{"kind":"kv","title":"API rate limits, decided","meta":"Engineering / Decisions","rows":[["Ceiling","600 requests per minute per workspace",""],["Rationale","p99 burst was 540, headroom kept deliberate",""],["Revisit","when a single tenant passes 400 sustained",""]]}}]},"todoist":{"name":"Todoist","icon":{"mono":"T","accent":"#1f9e8a","aspect":1.0},"panel":"checks","video":true,"alt":"A simulated Kestrel session on the Todoist integration. Asked \"Due today?\", Kestrel works through checking Todoist connection, finding tasks due today, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Due today?","card":"Reading Todoist","steps":[["find","Checking Todoist connection"],["check","Finding tasks due today"]],"panel":{"title":"Today","meta":"4 tasks","rows":[["","Revised SOW for Northwind","Work"],["","Review Priya's PR","Work"],["due","Renew domain","Admin"],["","Book the dentist","Personal"]]}},{"q":"Which project is the heaviest right now?","card":"Reading Todoist","steps":[["doc","Finding your projects"],["check","Getting an overview"]],"panel":{"title":"Projects","meta":"by open tasks","rows":[["","Work","18 open"],["","Admin","6 open"],["","Personal","4 open"]]}}]},"github":{"name":"GitHub","icon":{"mono":"G","accent":"#e2a336","aspect":1.0},"panel":"repos","video":false,"alt":"A simulated Kestrel session on the GitHub integration. Asked \"Open PRs on the web repo?\", Kestrel works through checking GitHub connection, listing open pull requests, then shows the result in a repos panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Open PRs on the web repo?","card":"Reading GitHub","steps":[["find","Checking GitHub connection"],["repo","Listing open pull requests"]],"panel":{"title":"acme/web","meta":"3 open","rows":[["open","#812","Cache the settings query","priya/cache-settings"],["draft","#809","Extract the mailer into a job","marco/mailer-job"],["open","#804","Bump the client to 4.2","deps/client-4-2"]]}},{"q":"What's actually in 812?","card":"Reading GitHub","steps":[["repo","Reading the pull request details"],["note","Listing the commits on it"]],"panel":{"title":"#812 Cache the settings query","meta":"priya/cache-settings","rows":[["commit","a3f1c0","Settings cache read path",""],["commit","77bd42","Invalidation on workspace update",""],["commit","e10a95","Test coverage for invalidation",""]]}},{"q":"Anything touching the auth module?","card":"Reading GitHub","steps":[["find","Searching code across your repositories"]],"panel":{"kind":"docs","title":"Code search","meta":"auth module","rows":[["lib/auth/session.rb","touched by #809","3 matches"],["lib/auth/tokens.rb","no open PR","1 match"]]}}]},"clickup":{"name":"ClickUp","icon":{"mono":"C","accent":"#e2a336","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the ClickUp integration. Asked \"How is the Platform space laid out?\", Kestrel works through checking ClickUp connection, reading the workspace structure, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"How is the Platform space laid out?","card":"Reading ClickUp","steps":[["find","Checking ClickUp connection"],["doc","Reading the workspace structure"]],"panel":{"title":"Platform","meta":"space, 3 lists","rows":[["","Ingest pipeline","12 tasks"],["","Query layer","9 tasks"],["","Runbooks","4 tasks"]]}},{"q":"What's blocked in the query layer?","card":"Reading ClickUp","steps":[["check","Filtering tasks by status"],["note","Reading the comments on them"]],"panel":{"title":"Query layer","meta":"status: blocked","rows":[["due","Partition the events table","waiting on infra"],["due","Backfill the Q2 range","blocked by the above"]]}}]},"asana":{"name":"Asana","icon":{"mono":"A","accent":"#3b7dd8","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the Asana integration. Asked \"What's on me this week?\", Kestrel works through checking Asana connection, surfacing your own tasks, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's on me this week?","card":"Reading Asana","steps":[["find","Checking Asana connection"],["check","Surfacing your own tasks"]],"panel":{"title":"My tasks","meta":"this week","rows":[["due","Write the migration runbook","Thu"],["","Review the vendor security questionnaire","Fri"],["","Sign off on the Q3 brief","Fri"]]}},{"q":"How does Platform look overall?","card":"Reading Asana","steps":[["doc","Surfacing your projects"],["note","Reading the project details"]],"panel":{"kind":"kv","title":"Platform","meta":"project","rows":[["Owner","you"],["Open tasks","14, three due this week"],["Status","on track, cutover set for the 14th"]]}}]},"plaud":{"name":"Plaud","icon":{"mono":"P","accent":"#1f9e8a","aspect":1.0},"panel":"recordings","video":false,"alt":"A simulated Kestrel session on the Plaud integration. Asked \"Find the recording where we argued about pricing.\", Kestrel works through checking Plaud connection, listing your recordings, then shows the result in a recordings panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Find the recording where we argued about pricing.","card":"Reading Plaud","steps":[["find","Checking Plaud connection"],["rec","Listing your recordings"]],"panel":{"title":"Recordings","meta":"3 matches","rows":[["","Pricing working session","48m, Tue"],["","Weekly product sync","31m, Mon"],["","Northwind discovery call","52m, last Thu"]]}},{"q":"What did the note say?","card":"Reading Plaud","steps":[["note","Retrieving the note for that recording"]],"panel":{"kind":"kv","title":"Pricing working session","meta":"AI note, 48m","rows":[["Decision","hold the entry price, add a usage tier",""],["Open","who owns the migration comms",""],["Next","revisit after the Northwind renewal",""]]}},{"q":"Read me the exact line about the usage tier.","card":"Reading Plaud","steps":[["rec","Retrieving the full transcript"]],"panel":{"kind":"events","title":"Transcript","meta":"Pricing working session","rows":[["18:42","so the usage tier sits above Plus, not beside it",""],["18:51","and it does not touch the entry price at all",""]]}}]},"ticktick":{"name":"TickTick","icon":{"mono":"T","accent":"#1f9e8a","aspect":1.0},"panel":"checks","video":false,"alt":"A simulated Kestrel session on the TickTick integration. Asked \"Show me what's overdue.\", Kestrel works through checking TickTick connection, finding tasks by due date, then shows the result in a checks panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Show me what's overdue.","card":"Reading TickTick","steps":[["find","Checking TickTick connection"],["check","Finding tasks by due date"]],"panel":{"title":"Overdue","meta":"2 tasks","rows":[["due","Chase the insurance renewal","Admin"],["due","Tax docs for Marco","Admin"]]}},{"q":"Open the insurance one.","card":"Reading TickTick","steps":[["doc","Reading the full task details"]],"panel":{"kind":"kv","title":"Chase the insurance renewal","meta":"Admin, was due Monday","rows":[["Priority","high",""],["Notes","policy number is on the Feb statement",""],["List","Admin",""]]}}]},"outlook":{"name":"Outlook","icon":{"mono":"O","accent":"#8e5bd0","aspect":1.0},"panel":"mail","video":false,"alt":"A simulated Kestrel session on the Outlook integration. Asked \"Did the signed order form ever come back from procurement?\", Kestrel works through checking Outlook connection, searching your inbox, checking the attachments on it, then shows the result in a mail panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Did the signed order form ever come back from procurement?","card":"Reading Outlook","steps":[["find","Checking Outlook connection"],["mail","Searching your inbox"],["note","Checking the attachments on it"]],"panel":{"title":"Procurement","meta":"4 results","rows":[["Ines Vogel","Signed order form attached","Wed"],["Ines Vogel","Re: order form, one correction","Tue"],["noreply","Approval routed to procurement","Mon"]]}},{"q":"What's attached to Wednesday's?","card":"Reading Outlook","steps":[["mail","Reading the message"],["doc","Listing its attachments"]],"panel":{"kind":"files","title":"Signed order form attached","meta":"from Ines Vogel, Wed","rows":[["pdf","order-form-signed.pdf","","412 KB"],["pdf","w9-northwind.pdf","","88 KB"]]}}]},"google-drive":{"name":"Google Drive","icon":{"mono":"G","accent":"#3b7dd8","aspect":1.0},"panel":"docs","video":false,"alt":"A simulated Kestrel session on the Google Drive integration. Asked \"Find the deck where we sized the market.\", Kestrel works through checking Google Drive connection, finding the file, then shows the result in a docs panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Find the deck where we sized the market.","card":"Reading Google Drive","steps":[["find","Checking Google Drive connection"],["doc","Finding the file"]],"panel":{"title":"Results","meta":"2 files","rows":[["Market sizing v4","Slides, edited last Thu","the numbers we presented"],["Market sizing scratch","Sheets, edited in March","working cells, superseded"]]}},{"q":"What number did v4 actually land on?","card":"Reading Google Drive","steps":[["doc","Reading what's in it"]],"panel":{"title":"Market sizing v4","meta":"Slides","rows":[["Slide 6","serviceable market, 1.8B","bottom-up, seats times price"],["Slide 7","reachable in 3 years, 240M","assumes current channel mix"]]}}]},"monday-com":{"name":"monday.com","icon":{"mono":"M","accent":"#3b7dd8","aspect":1.0},"panel":"board","video":false,"alt":"A simulated Kestrel session on the monday.com integration. Asked \"What's actually on the launch board this week?\", Kestrel works through checking monday.com connection, finding the board, reading the items on it, then shows the result in a board panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What's actually on the launch board this week?","card":"Reading monday.com","steps":[["find","Checking monday.com connection"],["board","Finding the board"],["note","Reading the items on it"]],"panel":{"title":"Launch","meta":"This week group","rows":[["working","Press release copy","Dana"],["stuck","Pricing page update","Marco"],["done","Support macros","Priya"]]}},{"q":"Which one is stuck?","card":"Reading monday.com","steps":[["board","Reading the item's columns"]],"panel":{"kind":"kv","title":"Pricing page update","meta":"Launch board","rows":[["Status","stuck, owned by Marco"],["Blocked by","legal review of the usage tier wording"],["Timeline","was this week, now unset"]]}}]},"webflow":{"name":"Webflow","icon":{"mono":"W","accent":"#1f9e8a","aspect":1.0},"panel":"cms","video":false,"alt":"A simulated Kestrel session on the Webflow integration. Asked \"Which blog posts are missing an SEO title?\", Kestrel works through checking Webflow connection, looking at the Blog Posts collection, checking which items are missing the field, then shows the result in a cms panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Which blog posts are missing an SEO title?","card":"Reading Webflow","steps":[["find","Checking Webflow connection"],["cms","Looking at the Blog Posts collection"],["note","Checking which items are missing the field"]],"panel":{"title":"Blog Posts","meta":"3 of 48 missing SEO title","rows":[["missing","How we think about context","no SEO title"],["missing","Changelog, July","no SEO title"],["missing","Hiring an ops lead","no SEO title"]]}},{"q":"Anything else thin on that collection?","card":"Reading Webflow","steps":[["cms","Looking at the rest of the fields"]],"panel":{"title":"Blog Posts","meta":"field coverage","rows":[["ok","Slug, author, body","48 of 48"],["missing","Open graph image","11 of 48 missing"],["ok","Category","48 of 48"]]}}]},"axiom":{"name":"Axiom","icon":{"mono":"A","accent":"#1f9e8a","aspect":1.0},"panel":"query","video":false,"alt":"A simulated Kestrel session on the Axiom integration. Asked \"Pull the error rate overnight.\", Kestrel works through checking Axiom connection, querying the dataset, then shows the result in a query panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Pull the error rate overnight.","card":"Reading Axiom","steps":[["find","Checking Axiom connection"],["query","Querying the dataset"]],"panel":{"title":"0.42%","meta":"error rate, 00:00 to 08:00","rows":[["Requests","1,284,900",""],["Errors","5,397",""],["Peak","1.9% at 03:10",""]]}},{"q":"What was it the night before?","card":"Reading Axiom","steps":[["query","Querying the same window"]],"panel":{"title":"0.11%","meta":"error rate, previous night","rows":[["Requests","1,190,440",""],["Errors","1,309",""],["Change","up 0.31 points overnight",""]]}}]},"dropbox":{"name":"Dropbox","icon":{"mono":"D","accent":"#1f9e8a","aspect":1.0},"panel":"files","video":false,"alt":"A simulated Kestrel session on the Dropbox integration. Asked \"Where's the signed Northwind MSA?\", Kestrel works through checking Dropbox connection, searching files and folders, then shows the result in a files panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"Where's the signed Northwind MSA?","card":"Reading Dropbox","steps":[["find","Checking Dropbox connection"],["file","Searching files and folders"]],"panel":{"title":"Results","meta":"2 files","rows":[["pdf","Northwind MSA signed.pdf","/Contracts/2026","1.2 MB"],["pdf","Northwind MSA draft.pdf","/Contracts/drafts","1.1 MB"]]}},{"q":"Has the signed one changed since February?","card":"Reading Dropbox","steps":[["file","Listing the file revisions"]],"panel":{"title":"Northwind MSA signed.pdf","meta":"3 revisions","rows":[["rev","Current","12 Feb","1.2 MB"],["rev","Previous","9 Feb","1.2 MB"],["rev","First","9 Feb","1.1 MB"]]}}]},"posthog":{"name":"PostHog","icon":{"mono":"P","accent":"#3b7dd8","aspect":1.0},"panel":"query","video":false,"alt":"A simulated Kestrel session on the PostHog integration. Asked \"What happened to signups last week?\", Kestrel works through checking PostHog connection, running the query, then shows the result in a query panel. Read only; nothing is changed.","hero":{"aspect":1.0},"beats":[{"q":"What happened to signups last week?","card":"Reading PostHog","steps":[["find","Checking PostHog connection"],["query","Running the query"]],"panel":{"title":"1,847","meta":"signups, last 7 days","rows":[["Week before","1,612",""],["Change","up 235",""],["Best day","Tuesday, 342",""]]}},{"q":"Which channel drove most of them?","card":"Reading PostHog","steps":[["doc","Opening the saved insight"]],"panel":{"title":"742","meta":"organic search, from the Signups by source insight","rows":[["Direct","531",""],["Referral","398",""],["Paid","176",""]]}},{"q":"And the pricing page experiment?","card":"Reading PostHog","steps":[["query","Reading the experiment results"]],"panel":{"title":"5.3%","meta":"variant B, pricing page test over 14 days","rows":[["Control","4.1% conversion",""],["Lift","up 1.2 points",""],["Exposure","18,402 users",""]]}}]}};
+(function () {
+  'use strict';
+  var HERO_ICON_H = 56;
+  var HERO_CAP_H = 33;
+  var parts = location.pathname.split('/').filter(Boolean);
+  var slug = parts[parts.length - 1] || '';
+  var D = DEMOS[slug];
+  if (!D) return;                       /* generic pages get nothing */
+  (function normaliseHero() {
+    if (!D.hero) return;
+    var lock = document.querySelector('.int-hero .int-lockup, .section_hero .int-lockup');
+    if (!lock) return;
+    var marks = lock.querySelectorAll('.int-lockup-logo');
+    if (marks.length < 2) return;       /* no partner mark to size */
+    var partner = marks[marks.length - 1];
+    if (D.hero.src) partner.src = D.hero.src;
+    var H = D.hero.wm ? HERO_CAP_H : HERO_ICON_H;
+    partner.style.height = H + 'px';
+    partner.style.width = (H * D.hero.aspect).toFixed(1) + 'px';
+    partner.style.objectFit = 'cover';
+    partner.style.maxWidth = 'none';
+  })();
+  if (document.querySelector('.int-ld')) return;
+  if (D.video) return;                  /* real footage wins -- see demos.py */
+  if (document.querySelector('video.int-demo-video')) return;
+  var mq = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)');
+  var reduce = !!(mq && mq.matches);
+  var ICON = {
+    find: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>',
+    doc:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6.5A1.5 1.5 0 0 0 5 4.5v15A1.5 1.5 0 0 0 6.5 21h11a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3v5h5"/><path d="M8.5 12.5h7M8.5 16h7"/></svg>',
+    note: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 15.5A1.5 1.5 0 0 1 18.5 17H8l-4 4V5.5A1.5 1.5 0 0 1 5.5 4h13A1.5 1.5 0 0 1 20 5.5z"/></svg>',
+    mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6 8.5-6"/></svg>',
+    check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/></svg>',
+    cal:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/></svg>',
+    repo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="6" r="2.5"/><circle cx="7" cy="18" r="2.5"/><circle cx="17" cy="12" r="2.5"/><path d="M7 8.5v7M9.5 6h3a2 2 0 0 1 2 2v2"/></svg>',
+    query:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="m7 15 3.5-4 3 2.5L20 7"/></svg>',
+    cms:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="5" rx="1.5"/><rect x="3.5" y="12" width="17" height="8" rx="1.5"/></svg>',
+    file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h4l2 2.5h7A1.5 1.5 0 0 1 20 10v7.5A1.5 1.5 0 0 1 18.5 19h-13A1.5 1.5 0 0 1 4 17.5z"/></svg>',
+    rec:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 10v4M9 7v10M13 9v6M17 11v2M21 10v4"/></svg>',
+    board:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M9 4.5v15M15 4.5v15"/></svg>'
+  };
+  var SEND = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>';
+  var MIC  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/></svg>';
+  var CHEV = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
+  var XG   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+  var BIRD = '<svg viewBox="0 0 100 100" aria-hidden="true"><path fill="currentColor" d="M50 4 L58 40 L94 48 L58 56 L50 92 L42 56 L6 48 L42 40 Z"/></svg>';
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  function reveal(el) { void el.offsetWidth; el.classList.add('on'); }
+  function markHTML() {
+    if (D.icon.mono) {
+      return '<span class="int-ld-mono" style="background:' + esc(D.icon.accent) +
+             '">' + esc(D.icon.mono) + '</span>';
+    }
+    return '<img alt="" decoding="async" src="' + esc(D.icon.url) + '">';
+  }
+  function pillLabel() { return D.icon.wm ? '' : esc(D.name); }
+  var PANEL = {
+    issues: function (r) {
+      return '<span class="int-ld-dot ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pid">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[2]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[3]) + '</span>';
+    },
+    checks: function (r) {
+      return '<span class="int-ld-box ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             (r[2] ? '<span class="int-ld-chip">' + esc(r[2]) + '</span>' : '');
+    },
+    mail: function (r) {
+      return '<span class="int-ld-from">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    docs: function (r) {
+      return '<span class="int-ld-dtile"></span><span class="int-ld-dstack">' +
+             '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-dsnip">' + esc(r[1]) +
+             (r[2] ? ' &middot; ' + esc(r[2]) : '') + '</span></span>';
+    },
+    events: function (r) {
+      return '<span class="int-ld-time">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    repos: function (r) {
+      return '<span class="int-ld-st ' + esc(r[0]) + '"></span>' +
+             '<span class="int-ld-pid">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[2]) + '</span>' +
+             (r[3] ? '<span class="int-ld-branch">' + esc(r[3]) + '</span>' : '');
+    },
+    query: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pval">' + esc(r[1]) + '</span>';
+    },
+    cms: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-flag ' + esc(r[0]) + '">' + esc(r[2]) + '</span>';
+    },
+    files: function (r) {
+      return '<span class="int-ld-ftype">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             (r[2] ? '<span class="int-ld-fpath">' + esc(r[2]) + '</span>' : '') +
+             (r[3] ? '<span class="int-ld-pwho">' + esc(r[3]) + '</span>' : '');
+    },
+    recordings: function (r) {
+      return '<span class="int-ld-wave"><i style="height:40%"></i>' +
+             '<i style="height:85%"></i><i style="height:60%"></i>' +
+             '<i style="height:100%"></i><i style="height:45%"></i></span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    board: function (r) {
+      return '<span class="int-ld-pillst ' + esc(r[0]) + '">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[2]) + '</span>';
+    },
+    ping: function (r) {
+      return '<span class="int-ld-pwhat">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwho">' + esc(r[1]) + '</span>';
+    },
+    kv: function (r) {
+      return '<span class="int-ld-klabel">' + esc(r[0]) + '</span>' +
+             '<span class="int-ld-pwhat">' + esc(r[1]) + '</span>';
+    }
+  };
+  var root = document.createElement('div');
+  root.className = D.icon.wm ? 'int-ld wm' : 'int-ld';
+  root.style.setProperty('--lg-a', D.icon.aspect);
+  root.innerHTML =
+    '<div class="int-ld-stage" role="img" aria-label="' + esc(D.alt) + '">' +
+      '<div class="int-ld-act int-ld-a1">' +
+        '<div class="int-ld-comp">' +
+          '<div class="int-ld-ctext"></div>' +
+          '<div class="int-ld-cbar">' +
+            '<div class="int-ld-plus">+</div>' +
+            '<div class="int-ld-mic">' + MIC + '</div>' +
+            '<div class="int-ld-send">' + SEND + '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="int-ld-act int-ld-a2">' +
+        '<div class="int-ld-bub"></div>' +
+        '<div class="int-ld-cardw"><div class="int-ld-card">' +
+          '<span class="int-ld-tile">' + markHTML() + '</span>' +
+          '<span class="int-ld-ctitle">Gathering context</span>' +
+          '<span class="int-ld-chev">' + CHEV + '</span>' +
+        '</div></div>' +
+        '<div class="int-ld-steps"></div>' +
+      '</div>' +
+      '<div class="int-ld-act int-ld-a3">' +
+        '<div class="int-ld-pill"><span class="x">' + XG + '</span>' +
+          '<span class="mark">' + markHTML() + '</span>' + pillLabel() + '</div>' +
+        '<div class="int-ld-panel int-ld-p-' + esc(D.panel) + '">' +
+          '<div class="int-ld-ptitle"></div>' +
+          '<div class="int-ld-pmeta"></div>' +
+          '<div class="int-ld-rows"></div>' +
+          '<div class="int-ld-bird">' + BIRD + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<button type="button" class="int-ld-tap" aria-label="Replay the demo">' +
+      '</button>' +
+    '</div>';
+  var q = function (s) { return root.querySelector(s); };
+  var a1 = q('.int-ld-a1'), a2 = q('.int-ld-a2'), a3 = q('.int-ld-a3'),
+      ctext = q('.int-ld-ctext'), bub = q('.int-ld-bub'),
+      card = q('.int-ld-cardw'), ctitle = q('.int-ld-ctitle'),
+      stepsBox = q('.int-ld-steps'), panel = q('.int-ld-panel'),
+      ptitle = q('.int-ld-ptitle'), pmeta = q('.int-ld-pmeta'),
+      rowsBox = q('.int-ld-rows'), bird = q('.int-ld-bird'),
+      stage = q('.int-ld-stage'), tap = q('.int-ld-tap');
+  var timers = [];
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function clearAll() { timers.forEach(clearTimeout); timers = []; }
+  function only(act) {
+    [a1, a2, a3].forEach(function (x) { x.classList.toggle('on', x === act); });
+  }
+  function paintSteps(beat) {
+    stepsBox.innerHTML = beat.steps.map(function (s) {
+      return '<div class="int-ld-strow"><span class="int-ld-sicon">' +
+             (ICON[s[0]] || ICON.find) + '</span>' +
+             '<span class="int-ld-slabel">' + esc(s[1]) + '</span></div>';
+    }).join('');
+    return stepsBox.querySelectorAll('.int-ld-strow');
+  }
+  function paintPanel(beat) {
+    var p = beat.panel;
+    var kind = p.kind || D.panel;        /* a beat may override the renderer */
+    var fn = PANEL[kind] || PANEL.issues;
+    panel.className = 'int-ld-panel int-ld-p-' + kind;
+    ptitle.textContent = p.title;
+    pmeta.textContent = p.meta || '';
+    panel.classList.toggle('hasmeta', !!p.meta);
+    rowsBox.innerHTML = p.rows.map(function (r) {
+      return '<div class="int-ld-prow">' + fn(r) + '</div>';
+    }).join('');
+    return rowsBox.querySelectorAll('.int-ld-prow');
+  }
+  function resetAll() {
+    clearAll();
+    ctext.textContent = '';
+    bub.textContent = '';
+    bub.classList.remove('on');
+    card.className = 'int-ld-cardw';
+    ctitle.textContent = 'Gathering context';
+    stepsBox.innerHTML = '';
+    rowsBox.innerHTML = '';
+    ptitle.textContent = '';
+    pmeta.textContent = '';
+    bird.classList.remove('on', 'flew');
+    only(null);
+  }
+  function still() {
+    resetAll();
+    var last = D.beats[D.beats.length - 1];
+    bub.textContent = last.q;
+    bub.classList.add('on');
+    var rows = paintPanel(last);
+    Array.prototype.forEach.call(rows, function (r) { r.classList.add('on'); });
+    bird.classList.add('on', 'flew');
+    only(a3);
+    idle(true);
+  }
+  function idle(on) { root.classList.toggle('is-idle', !!on); }
+  function play() {
+    resetAll();
+    idle(false);
+    var t = 0;
+    D.beats.forEach(function (beat, i) {
+      var steps;
+      if (i === 0) {
+        only(a1);
+        t += 400;
+        at(t, function () {
+          only(a1);
+          var n = 0;
+          (function tick() {
+            ctext.textContent = beat.q.slice(0, ++n);
+            if (n < beat.q.length) at(33, tick);
+          })();
+        });
+        t += beat.q.length * 33 + 480;
+      } else {
+        t += 700;                        /* a breath between exchanges */
+      }
+      var tCut = t;
+      at(tCut, function () {
+        only(a2);
+        bub.textContent = beat.q;
+        reveal(bub);
+        card.className = 'int-ld-cardw';
+        ctitle.textContent = 'Gathering context';
+        steps = paintSteps(beat);
+      });
+      at(tCut + 400, function () {
+        card.classList.add('on');
+        at(60, function () { card.classList.add('run'); });
+      });
+      beat.steps.forEach(function (s, k) {
+        at(tCut + 1000 + k * 900, function () {
+          if (steps && steps[k]) steps[k].classList.add('on');
+        });
+      });
+      at(tCut + 1300, function () {
+        ctitle.textContent = beat.card;
+        card.classList.add('done');
+      });
+      var tPanel = tCut + 900 + beat.steps.length * 900 + 700;
+      at(tPanel, function () {
+        only(a3);
+        var rows = paintPanel(beat);
+        if (i === 0) {
+          bird.classList.add('on');
+          at(400, function () { bird.classList.add('flew'); });
+        } else {
+          bird.classList.add('on', 'flew');   /* already flown, stays put */
+        }
+        beat.panel.rows.forEach(function (_, k) {
+          at(400 + k * 600, function () {
+            if (rows[k]) rows[k].classList.add('on');
+          });
+        });
+      });
+      t = tPanel + 400 + beat.panel.rows.length * 600 + 1400;
+    });
+    at(t + 600, play);                   /* loop */
+  }
+  var running = false;
+  function start() {
+    if (running) return;
+    running = true;
+    play();
+  }
+  function autoStart() {
+    if (reduce) return;
+    start();
+  }
+  function stop(settle) {
+    running = false;
+    clearAll();
+    if (settle) still();               /* never freeze mid-frame */
+  }
+  function inView() {
+    var r = stage.getBoundingClientRect();
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    return r.top < vh && r.bottom > 0;
+  }
+  function ensure() {
+    if (reduce || running) return;
+    if (inView()) autoStart();
+  }
+  function tapped() {
+    stop(false);
+    start();
+  }
+  tap.addEventListener('click', tapped);
+  function mount() {
+    var slot = document.querySelector('.int-hero .int-demo-media');
+    if (slot && slot.parentNode) { slot.parentNode.insertBefore(root, slot); return true; }
+    var ctr = document.querySelector('.int-hero .int-ctr');
+    if (!ctr) return false;
+    ctr.appendChild(root);
+    return true;
+  }
+  function boot() {
+    if (!mount()) return;
+    if (reduce) { still(); return; }
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) autoStart();
+          else if (running) stop(true);
+        });
+      }, { threshold: 0.2 }).observe(stage);
+    } else {
+      autoStart();
+    }
+    setTimeout(ensure, 1200);
+    window.addEventListener('scroll', ensure, { passive: true });
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden) { if (running) stop(true); }
+      else if (inView()) { stop(false); autoStart(); }
+    });
+    if (mq && mq.addEventListener) {
+      mq.addEventListener('change', function (e) {
+        reduce = e.matches;
+        if (reduce) { stop(false); still(); } else { ensure(); }
+      });
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else { boot(); }
+})();
+</script>

@@ -1,0 +1,6 @@
+{
+  "_comment": "Optional. Copy to logos.json and fill in. Keys are demos.py slugs. aspect is the MEASURED ink aspect (tools/measure_ink.py), never the canvas aspect. Omit a slug and the engine draws a monogram tile instead.",
+  "linear":  {"url": "https://your-cdn.example/linear.png",  "aspect": 1.0},
+  "plaud":   {"url": "https://your-cdn.example/plaud.png",   "aspect": 5.945},
+  "clickup": {"url": "https://your-cdn.example/clickup.png", "aspect": 0.835, "hero_src": "https://your-cdn.example/clickup-icon.png"}
+}

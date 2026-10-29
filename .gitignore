@@ -1,0 +1,5 @@
+harness/
+__pycache__/
+MANIFEST.md
+logos/
+.DS_Store
