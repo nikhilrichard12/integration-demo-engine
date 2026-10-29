@@ -1,4 +1,4 @@
-# See it work
+# Integration demo engine
 
 A zero-dependency animation engine that puts a looping, scripted product demo on every
 integration page of a marketing site, from one 48 KB embed. Each page gets a different
